@@ -1,0 +1,6 @@
+tar -xf archive.tar.gz
+
+
+
+------------
+sudo dpkg -i deb_packege ----- insatll *.deb
