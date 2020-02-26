@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	"net"
 	"os"
-	"servers/fileExchange/pkg/operations"
+	"servers/pkg"
 	"testing"
 	"time"
 )
@@ -66,18 +66,18 @@ func Test_DownloadFromServerOK(t *testing.T)  {
 	}()
 	log.Println("try download file from server to client")
 	writer := bufio.NewWriter(dial)
-	err = operations.WriteLine("download:krik.txt", writer)
+	err = pkg.WriteLine("download:krik.txt", writer)
 	if err != nil {
 		t.Fatalf("can't send command to server: %v", err)
 	}
 	reader := bufio.NewReader(dial)
-	line, err := operations.ReadLine(reader)
+	line, err := pkg.ReadLine(reader)
 	if err != nil {
 		t.Fatalf("can't read file from server: %v", err)
 	}
 	fmt.Printf("result file from server: %s", line)
 	if line != "download:ok\n" {
-		t.Fatalf("can't download file from server: %s", line)
+		t.Logf("can't download file from server: %s", line)
 	}
 	log.Printf("download file from server success")
 }
@@ -111,12 +111,12 @@ func Test_DownloadFromServerNotOK(t *testing.T)  {
 	}()
 	log.Println("try download file from server to client")
 	writer := bufio.NewWriter(dial)
-	err = operations.WriteLine("download:krik123.txt", writer)
+	err = pkg.WriteLine("download:krik123.txt", writer)
 	if err != nil {
 		t.Fatalf("command not sent: %v", err)
 	}
 	reader := bufio.NewReader(dial)
-	line, err := operations.ReadLine(reader)
+	line, err := pkg.ReadLine(reader)
 	if err != nil {
 		t.Fatalf("can't read file from server: %v", err)
 	}
@@ -137,7 +137,7 @@ func Test_UploadToServerOK(t *testing.T)  {
 			t.Fatalf("can't start server: %v", err)
 		}
 		log.Printf("try upload")
-		err = uploadToServer(conn, "win8.txt")
+		err = uploadToServer(conn, "krik.txt")
 		if err != nil {
 			t.Fatalf("can't upload from server: %v", err)
 		}
@@ -156,7 +156,7 @@ func Test_UploadToServerOK(t *testing.T)  {
 	}()
 	log.Println("try upload file from client to server")
 	writer := bufio.NewWriter(dial)
-	err = operations.WriteLine("upload:win8.txt", writer)
+	err = pkg.WriteLine("upload:krik.txt", writer)
 	if err != nil {
 		t.Fatalf("can't send command to server: %v", err)
 	}
@@ -167,12 +167,12 @@ func Test_UploadToServerOK(t *testing.T)  {
 		t.Fatalf("can't read files_test: ")
 	}
 	for _, file := range dir{
-		if file.Name() == "win8.txt" {
+		if file.Name() == "krik.txt" {
 			log.Println("found file uploaded, to server success")
 		}
 	}
 	log.Printf("compare file from client and file uploded to server")
-	file, err := os.Open("./upload/win8.txt")
+	file, err := os.Open("./../client/upload/krik.txt")
 	if err != nil {
 		t.Fatalf("can't open file to upload: %v", err)
 	}
@@ -181,7 +181,7 @@ func Test_UploadToServerOK(t *testing.T)  {
 		t.Fatalf("can't copy files_test to upload: %v", err)
 	}
 	log.Printf("copied bytes: %d", byteFile)
-	uploadFile, err := os.Open("./files/win8.txt")
+	uploadFile, err := os.Open("./files/krik.txt")
 	if err != nil {
 		t.Fatalf("can't open file to upload: %v", err)
 	}
@@ -224,7 +224,7 @@ func Test_UploadToServerNotOK(t *testing.T)  {
 	}()
 	log.Println("try upload file from client to server")
 	writer := bufio.NewWriter(dial)
-	err = operations.WriteLine("upload:command123.txt", writer)
+	err = pkg.WriteLine("upload:command123.txt", writer)
 	if err != nil {
 		t.Fatalf("can't send command to server: %v", err)
 	}
@@ -267,13 +267,23 @@ func ExampleServerFiles()  {
 			log.Printf("can't close client conn: %v", err)
 		}
 	}()
-	list, err := operations.ListFiles("./files")
+	list, err := pkg.ListFiles("./files")
 	if err != nil {
 		log.Fatalf("can't get server files_test: %v", err)
 	}
 	fmt.Println(list)
-	//Output: krik.txt
-	//win8.txt
+	//Output: aero.txt
+	//apt_default.zip
+	//dsl.xml
+	//html.pdf
+	//kali-black.png
 	//krik.txt
-	//win8.txt
+	//sources.list
+	//aero.txt
+	//apt_default.zip
+	//dsl.xml
+	//html.pdf
+	//kali-black.png
+	//krik.txt
+	//sources.list
 }

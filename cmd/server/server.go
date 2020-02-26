@@ -8,7 +8,7 @@ import (
 	"log"
 	"net"
 	"os"
-	"servers/fileExchange/pkg/operations"
+	"servers/pkg"
 	"strings"
 )
 
@@ -55,7 +55,7 @@ func handleConn(conn net.Conn) (err error) {
 	}()
 	log.Printf("connect is stable!")
 	reader := bufio.NewReader(conn)
-	cmdClient, err := operations.ReadLine(reader)
+	cmdClient, err := pkg.ReadLine(reader)
 	if err != nil {
 		log.Printf("error while reading: %v", err)
 		return err
@@ -96,17 +96,17 @@ func downloadFromServer(conn net.Conn, arg string) (err error) {
 	writer := bufio.NewWriter(conn)
 	log.Printf("client try download file: %s", arg)
 	arg = strings.TrimSuffix(arg, "\n")
-	rootFiles := "./files/"
+	rootFiles := "./cmd/server/files/"
 	log.Printf("try find file: %s, from directory: %s", arg, rootFiles)
 	downloadFile := rootFiles + arg
 	file, err := os.Open(downloadFile)
 	if err != nil {
 		log.Printf("can't find file: %s, it error: %v", arg, err)
-		_ = operations.WriteLine("error file not found", writer)
+		_ = pkg.WriteLine("error file not found", writer)
 		return err
 	}
 	log.Printf("file found: %s, from directory: %s", arg, rootFiles)
-	err = operations.WriteLine("download:ok", writer)
+	err = pkg.WriteLine("download:ok", writer)
 	if err != nil {
 		log.Printf("error while writing: %v", err)
 		return err
@@ -128,7 +128,7 @@ func uploadToServer(conn net.Conn, arg string) (err error) {
 	log.Printf("client try upload file to server: %s", arg)
 	log.Printf("try upload file: %s from client", arg)
 	reader := bufio.NewReader(conn)
-	_, err = operations.ReadLine(reader)
+	_, err = pkg.ReadLine(reader)
 	if err != nil {
 		log.Printf("can't read: %v", err)
 		return err
@@ -146,7 +146,7 @@ func uploadToServer(conn net.Conn, arg string) (err error) {
 		log.Printf("file: %s is not exist in client", arg)
 		return err
 	}
-	downloadDir := "./files/"
+	downloadDir := "./cmd/server/files/"
 	log.Printf("download file: %s, size by bytes: %d, to: %s", arg, len(bytes), downloadDir)
 	downloadFile := downloadDir + arg
 	log.Printf("try create file: %s", downloadFile)
@@ -174,17 +174,17 @@ func uploadToServer(conn net.Conn, arg string) (err error) {
 }
 
 func listFilesFromServer (conn net.Conn) (err error) {
-	const serverFiles = "./files"
+	const serverFiles = "./cmd/server/files"
 	writeFileLists := bufio.NewWriter(conn)
 	log.Printf("try get list from: %s", serverFiles)
-	getListFile, err := operations.ListFiles(serverFiles)
+	getListFile, err := pkg.ListFiles(serverFiles)
 	if err != nil {
 		log.Printf("can't get server Files list: %v", err)
 		return err
 	}
 	log.Printf("server Files list get success.")
 	log.Printf("try send server Files list to client.")
-	err = operations.WriteLine(getListFile, writeFileLists)
+	err = pkg.WriteLine(getListFile, writeFileLists)
 	if err != err {
 		log.Printf("can't send server Files list to client: %v", err)
 		return err

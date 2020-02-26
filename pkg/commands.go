@@ -1,4 +1,4 @@
-package operations
+package pkg
 
 const ClientCommand = `Available command: 
 Download 

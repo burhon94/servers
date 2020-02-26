@@ -9,13 +9,13 @@ import (
 	"log"
 	"net"
 	"os"
-	"servers/fileExchange/pkg/operations"
+	"servers/pkg"
 	"strings"
 )
 
 var cmd = flag.String("cmd", "download", "command:")
 
-var arg = flag.String("file", "l2.bot", "file name:")
+var arg = flag.String("file", "html.pdf", "file name:")
 
 func main() {
 	const addr = "localhost:9999"
@@ -70,7 +70,7 @@ func downloadClient(dial net.Conn, cmd string) (err error) {
 	cmd = cmd + *arg
 	cmdSend := bufio.NewWriter(dial)
 	log.Printf("try send command to server: %s: ", cmd)
-	err = operations.WriteLine(cmd, cmdSend)
+	err = pkg.WriteLine(cmd, cmdSend)
 	if err != nil {
 		log.Printf("can' t send command: %s, to server, error: %v", cmd, err)
 		return err
@@ -78,7 +78,7 @@ func downloadClient(dial net.Conn, cmd string) (err error) {
 	log.Println("command send success")
 	log.Printf("try download file: %s from server", *arg)
 	reader := bufio.NewReader(dial)
-	line, err := operations.ReadLine(reader)
+	line, err := pkg.ReadLine(reader)
 	if err != nil {
 		log.Printf("can't read: %v", err)
 		return err
@@ -97,12 +97,12 @@ func downloadClient(dial net.Conn, cmd string) (err error) {
 		return err
 	}
 	log.Printf("file: %s exist in server", *arg)
-	downloadDir := "./download/"
+	downloadDir := "./cmd/client/download/"
 	log.Printf("check dir status")
 	_, err = os.Stat(downloadDir)
 	if err != nil {
 		log.Printf("try create directory to save: %s", downloadDir)
-		err := operations.MkDir(downloadDir)
+		err := pkg.MkDir(downloadDir)
 		if err != nil {
 			log.Printf("can't create directory: %s, error: %v", downloadDir, err)
 			return err
@@ -136,12 +136,12 @@ func downloadClient(dial net.Conn, cmd string) (err error) {
 }
 
 func uploadClient(dial net.Conn, cmd string) (err error) {
-	log.Printf("You need have directory \"upload\" and put there your files.")
+	log.Printf("You need have directory \"./cmd/client/upload/\" and put there your files.")
 	cmd = cmd + ":"
 	cmd = cmd + *arg
 	cmdSend := bufio.NewWriter(dial)
 	log.Printf("try send command to server: %s: ", cmd)
-	err = operations.WriteLine(cmd, cmdSend)
+	err = pkg.WriteLine(cmd, cmdSend)
 	if err != nil {
 		log.Printf("can' t send command: %s, to server, error: %v", cmd, err)
 		return err
@@ -149,18 +149,18 @@ func uploadClient(dial net.Conn, cmd string) (err error) {
 	log.Println("command send success")
 	log.Printf("try upload file: %s to server", *arg)
 	writer := bufio.NewWriter(dial)
-	err = operations.WriteLine("upload: ok", writer)
+	err = pkg.WriteLine("upload: ok", writer)
 	if err != nil {
 		log.Printf("error while writing: %v", err)
 		return err
 	}
 	*arg = strings.TrimSuffix(*arg, "\n")
-	uploadDir := "./upload/"
+	uploadDir := "./cmd/client/upload/"
 	uploadFile := uploadDir + *arg
 	file, err := os.Open(uploadFile)
 	if err != nil {
 		log.Printf("can't find file: %s, it error: %v", *arg, err)
-		_ = operations.WriteLine("error", writer)
+		_ = pkg.WriteLine("error", writer)
 		return err
 	}
 	log.Printf("try copy file: %s, from directory: %v", *arg, uploadDir)
@@ -179,7 +179,7 @@ func listClient(dial net.Conn, cmd string) (err error) {
 	cmd = cmd + ":"
 	cmdSend := bufio.NewWriter(dial)
 	log.Printf("try send command to server: %s", cmd)
-	err = operations.WriteLine(cmd, cmdSend)
+	err = pkg.WriteLine(cmd, cmdSend)
 	if err != nil {
 		log.Printf("can't  send command: %s to server", cmd)
 		return err
@@ -187,7 +187,7 @@ func listClient(dial net.Conn, cmd string) (err error) {
 	log.Println("command send success")
 	log.Println("try get files list from server")
 	reader := bufio.NewReader(dial)
-	_, err = operations.ReadLine(reader)
+	_, err = pkg.ReadLine(reader)
 	if err != nil {
 		log.Printf("can't read: %v", err)
 		return err
