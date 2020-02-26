@@ -13,9 +13,9 @@ import (
 	"strings"
 )
 
-var cmd = flag.String("cmd", "download", "command:")
+var cmd = flag.String("cmd", "upload", "command:")
 
-var arg = flag.String("file", "html.pdf", "file name:")
+var arg = flag.String("file", "linasux.pdf", "file name:")
 
 func main() {
 	const addr = "localhost:9999"
@@ -97,7 +97,7 @@ func downloadClient(dial net.Conn, cmd string) (err error) {
 		return err
 	}
 	log.Printf("file: %s exist in server", *arg)
-	downloadDir := "./cmd/client/download/"
+	downloadDir := pkg.ClientDownloadDir
 	log.Printf("check dir status")
 	_, err = os.Stat(downloadDir)
 	if err != nil {
@@ -136,7 +136,7 @@ func downloadClient(dial net.Conn, cmd string) (err error) {
 }
 
 func uploadClient(dial net.Conn, cmd string) (err error) {
-	log.Printf("You need have directory \"./cmd/client/upload/\" and put there your files.")
+	log.Printf("You need have directory " + pkg.ClientUploadFiles + " and put there your files.")
 	cmd = cmd + ":"
 	cmd = cmd + *arg
 	cmdSend := bufio.NewWriter(dial)
@@ -155,7 +155,7 @@ func uploadClient(dial net.Conn, cmd string) (err error) {
 		return err
 	}
 	*arg = strings.TrimSuffix(*arg, "\n")
-	uploadDir := "./cmd/client/upload/"
+	uploadDir := pkg.ClientUploadFiles
 	uploadFile := uploadDir + *arg
 	file, err := os.Open(uploadFile)
 	if err != nil {

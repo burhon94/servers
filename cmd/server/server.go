@@ -96,7 +96,7 @@ func downloadFromServer(conn net.Conn, arg string) (err error) {
 	writer := bufio.NewWriter(conn)
 	log.Printf("client try download file: %s", arg)
 	arg = strings.TrimSuffix(arg, "\n")
-	rootFiles := "./cmd/server/files/"
+	rootFiles := pkg.ServerFiles
 	log.Printf("try find file: %s, from directory: %s", arg, rootFiles)
 	downloadFile := rootFiles + arg
 	file, err := os.Open(downloadFile)
@@ -146,7 +146,7 @@ func uploadToServer(conn net.Conn, arg string) (err error) {
 		log.Printf("file: %s is not exist in client", arg)
 		return err
 	}
-	downloadDir := "./cmd/server/files/"
+	downloadDir := pkg.ServerFiles
 	log.Printf("download file: %s, size by bytes: %d, to: %s", arg, len(bytes), downloadDir)
 	downloadFile := downloadDir + arg
 	log.Printf("try create file: %s", downloadFile)
@@ -174,7 +174,7 @@ func uploadToServer(conn net.Conn, arg string) (err error) {
 }
 
 func listFilesFromServer (conn net.Conn) (err error) {
-	const serverFiles = "./cmd/server/files"
+	const serverFiles = pkg.ServerFiles
 	writeFileLists := bufio.NewWriter(conn)
 	log.Printf("try get list from: %s", serverFiles)
 	getListFile, err := pkg.ListFiles(serverFiles)
