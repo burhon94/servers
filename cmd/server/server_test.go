@@ -37,7 +37,7 @@ func Test_ConnectToServer(t *testing.T) {
 	}()
 }
 
-func Test_DownloadFromServerOK(t *testing.T)  {
+func Test_DownloadFromServerOK(t *testing.T) {
 	var host = "localhost"
 	var port = rand.Intn(999) + 9000
 	addr := fmt.Sprintf("%s:%d", host, port)
@@ -82,7 +82,7 @@ func Test_DownloadFromServerOK(t *testing.T)  {
 	log.Printf("download file from server success")
 }
 
-func Test_DownloadFromServerNotOK(t *testing.T)  {
+func Test_DownloadFromServerNotOK(t *testing.T) {
 	var host = "localhost"
 	var port = rand.Intn(999) + 9000
 	addr := fmt.Sprintf("%s:%d", host, port)
@@ -127,7 +127,7 @@ func Test_DownloadFromServerNotOK(t *testing.T)  {
 	log.Printf("just be download failed from server")
 }
 
-func Test_UploadToServerOK(t *testing.T)  {
+func Test_UploadToServerOK(t *testing.T) {
 	var host = "localhost"
 	var port = rand.Intn(999) + 9000
 	addr := fmt.Sprintf("%s:%d", host, port)
@@ -166,7 +166,7 @@ func Test_UploadToServerOK(t *testing.T)  {
 	if err != nil {
 		t.Fatalf("can't read files_test: ")
 	}
-	for _, file := range dir{
+	for _, file := range dir {
 		if file.Name() == "krik.txt" {
 			log.Println("found file uploaded, to server success")
 		}
@@ -195,7 +195,7 @@ func Test_UploadToServerOK(t *testing.T)  {
 	log.Printf("file upload corrected")
 }
 
-func Test_UploadToServerNotOK(t *testing.T)  {
+func Test_UploadToServerNotOK(t *testing.T) {
 	var host = "localhost"
 	var port = rand.Intn(999) + 9000
 	addr := fmt.Sprintf("%s:%d", host, port)
@@ -234,7 +234,7 @@ func Test_UploadToServerNotOK(t *testing.T)  {
 	if err != nil {
 		t.Fatalf("can't read files_test: ")
 	}
-	for _, file := range dir{
+	for _, file := range dir {
 		if file.Name() == "command123.txt" {
 			t.Fatalf("file just not be exist on server")
 		}
@@ -242,7 +242,7 @@ func Test_UploadToServerNotOK(t *testing.T)  {
 	log.Printf("file upload incorrect")
 }
 
-func ExampleServerFiles()  {
+func ExampleServerFiles() {
 	var host = "localhost"
 	var port = rand.Intn(999) + 9000
 	addr := fmt.Sprintf("%s:%d", host, port)

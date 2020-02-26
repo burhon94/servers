@@ -173,7 +173,7 @@ func uploadToServer(conn net.Conn, arg string) (err error) {
 	return nil
 }
 
-func listFilesFromServer (conn net.Conn) (err error) {
+func listFilesFromServer(conn net.Conn) (err error) {
 	const serverFiles = pkg.ServerFiles
 	writeFileLists := bufio.NewWriter(conn)
 	log.Printf("try get list from: %s", serverFiles)
