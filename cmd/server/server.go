@@ -41,7 +41,12 @@ func serverStart(addr string) (err error, conn net.Conn) {
 			continue
 		}
 		log.Printf("Server find connect on: %s", addr)
-		go handleConn(conn)
+		go func() {
+		err := handleConn(conn)
+		if err != nil {
+			log.Printf("can't handler connect: %v", err)
+		}
+		}()
 	}
 }
 
@@ -56,10 +61,12 @@ func handleConn(conn net.Conn) (err error) {
 	log.Printf("connect is stable!")
 	reader := bufio.NewReader(conn)
 	cmdClient, err := pkg.ReadLine(reader)
+
 	if err != nil {
 		log.Printf("error while reading: %v", err)
 		return err
 	}
+
 	index := strings.IndexByte(cmdClient, ':')
 	cmd, arg := cmdClient[:index], cmdClient[index+1:]
 	log.Printf("command from client: %s", cmd)
@@ -72,6 +79,7 @@ func handleConn(conn net.Conn) (err error) {
 				log.Printf("can't downlod file from server to client: %v", err)
 			}
 		}
+
 	case "upload":
 		{
 			err := uploadToServer(conn, arg)
@@ -79,6 +87,7 @@ func handleConn(conn net.Conn) (err error) {
 				log.Printf("can't upload file from client to server: %v", err)
 			}
 		}
+
 	case "list":
 		{
 			err := listFilesFromServer(conn)
@@ -86,6 +95,7 @@ func handleConn(conn net.Conn) (err error) {
 				log.Printf("can't send list files to client: %v", err)
 			}
 		}
+
 	default:
 		fmt.Println("error request from client")
 	}
@@ -100,39 +110,45 @@ func downloadFromServer(conn net.Conn, arg string) (err error) {
 	log.Printf("try find file: %s, from directory: %s", arg, rootFiles)
 	downloadFile := rootFiles + arg
 	file, err := os.Open(downloadFile)
+
 	if err != nil {
 		log.Printf("can't find file: %s, it error: %v", arg, err)
 		_ = pkg.WriteLine("error file not found", writer)
 		return err
 	}
+
 	log.Printf("file found: %s, from directory: %s", arg, rootFiles)
 	err = pkg.WriteLine("download:ok", writer)
 	if err != nil {
 		log.Printf("error while writing: %v", err)
 		return err
 	}
+
 	log.Printf("try copy file: %s, from directory: %v", arg, rootFiles)
 	byteFile, err := io.Copy(writer, file)
 	if err != nil {
 		log.Printf("can't copy file: %s, it error: %v", arg, err)
 		return err
 	}
+
 	log.Printf("file copied: %s, size by bytes: %d", arg, byteFile)
 	log.Printf("file copy success")
 	log.Printf("file sent to client success")
+
 	return nil
 }
 
 func uploadToServer(conn net.Conn, arg string) (err error) {
 	arg = strings.TrimSuffix(arg, "\n")
-	log.Printf("client try upload file to server: %s", arg)
 	log.Printf("try upload file: %s from client", arg)
 	reader := bufio.NewReader(conn)
 	_, err = pkg.ReadLine(reader)
+
 	if err != nil {
 		log.Printf("can't read: %v", err)
 		return err
 	}
+
 	bytes, err := ioutil.ReadAll(reader)
 	if err != nil {
 		if err != io.EOF {
@@ -141,7 +157,6 @@ func uploadToServer(conn net.Conn, arg string) (err error) {
 		}
 	}
 	check := string(bytes)
-	log.Printf("check file: %s exist in client", arg)
 	if check == "error\n" {
 		log.Printf("file: %s is not exist in client", arg)
 		return err
@@ -149,7 +164,7 @@ func uploadToServer(conn net.Conn, arg string) (err error) {
 	downloadDir := pkg.ServerFiles
 	log.Printf("download file: %s, size by bytes: %d, to: %s", arg, len(bytes), downloadDir)
 	downloadFile := downloadDir + arg
-	log.Printf("try create file: %s", downloadFile)
+
 	file, err := os.OpenFile(downloadFile, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Printf("can't create file: %s, error: %v", arg, err)
@@ -161,15 +176,15 @@ func uploadToServer(conn net.Conn, arg string) (err error) {
 			log.Printf("can't close file: %v", err)
 		}
 	}()
-	log.Printf("create file: %s, success", downloadFile)
+
 	log.Printf("try write to file: %s", arg)
 	_, err = file.Write(bytes)
 	if err != nil {
 		log.Printf("can't write to file: %s, error: %v", arg, err)
 		return err
 	}
-	log.Printf("file: %s, download success!", arg)
-	log.Println("upload to server from client success!")
+
+	log.Printf("upload file: %s, to server from client success!", arg)
 	return nil
 }
 
@@ -178,17 +193,21 @@ func listFilesFromServer(conn net.Conn) (err error) {
 	writeFileLists := bufio.NewWriter(conn)
 	log.Printf("try get list from: %s", serverFiles)
 	getListFile, err := pkg.ListFiles(serverFiles)
+
 	if err != nil {
 		log.Printf("can't get server Files list: %v", err)
 		return err
 	}
+
 	log.Printf("server Files list get success.")
 	log.Printf("try send server Files list to client.")
 	err = pkg.WriteLine(getListFile, writeFileLists)
+
 	if err != err {
 		log.Printf("can't send server Files list to client: %v", err)
 		return err
 	}
+
 	log.Printf("server Files list send success to client")
 	return nil
 }
